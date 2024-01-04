@@ -1,0 +1,11 @@
+{
+  "name": "vtube",
+  "version": "1.0.0",
+  "description": "video website like youtube with tweets functionality",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "arun sengar",
+  "license": "ISC"
+}
