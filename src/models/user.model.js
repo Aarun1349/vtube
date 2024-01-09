@@ -78,4 +78,4 @@ userSchema.methods.generateRefereshToken = async function () {
 };
 
 const User = model("User", userSchema);
-export default User;
+export  {User};

@@ -12,14 +12,16 @@ const asyncHandler =(fn)=>async(re,res,next)=>{
 }
 
 const asyncHandlerPromiseVersion =(requestHandler)=>{
-    (req,res,next)=>{
+    return(req,res,next)=>{
         Promise.resolve(requestHandler(req,res,next)).catch((err)=>{
+            console.log('err',err)
             res.status(err.code || 500).json({
                 success:false,
                 message:err.message
             })  
         })
     }
+    
 }
 
 export {asyncHandler,asyncHandlerPromiseVersion}
