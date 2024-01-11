@@ -3,10 +3,28 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
+import jwt from "jsonwebtoken";
+const generateAccessAndRefreshToken = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
+    user.refreshToken = refreshToken;
+    user.accessToken = accessToken;
+    await user.save({ validateBeforeSave: false });
+    return {
+      accessToken,
+      refreshToken,
+    };
+  } catch (error) {
+    throw new ApiError(500, "Something went wrong");
+  }
+};
+
 const registerUser = asyncHandlerPromiseVersion(async (req, res) => {
   //Step 1: get user details from frontend
   const { username, fullname, email, password } = req.body;
-  console.log(username, fullname, email, password);
+
   //Step2: validation
   if (
     [fullname, username, email, password].some((field) => field?.trim() === "")
@@ -21,20 +39,36 @@ const registerUser = asyncHandlerPromiseVersion(async (req, res) => {
   }
 
   //Step4: if image files exist or not and for avatar
-  console.log("files", req.files.avatar[0].path);
+
+  // if (Object.getPrototypeOf(req.files) === null) {
+  //   throw new ApiError(400, "Avatar file is required");
+  // }
+
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverLocalPath = req.files?.coverImage[0]?.path;
-  //   console.log(req)
+
+  let coverLocalPath;
+
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.length > 0
+  ) {
+    coverLocalPath = req.files?.coverImage[0]?.path;
+  }
   //Step5: upload them to cloudinary,check avatar
   const avatar = await uploadOnCloudinary(avatarLocalPath);
-  const coverImage = await uploadOnCloudinary(coverLocalPath);
-  console.log("AVATAR", avatar, avatarLocalPath, coverImage, coverLocalPath);
+  let coverImage;
+  if (coverLocalPath) {
+    coverImage = await uploadOnCloudinary(coverLocalPath);
+  }
+
   if (!avatar) {
     throw new ApiError(400, "Avatar file is required");
   }
+
   //Step6: create entry in db
   const newUser = await User.create({
     fullname,
@@ -42,7 +76,7 @@ const registerUser = asyncHandlerPromiseVersion(async (req, res) => {
     email,
     password,
     avatar: avatar.url,
-    coverImage: coverImage.url || "",
+    coverImage: coverImage?.url ? coverImage.url : "",
   });
 
   //Step7: check for user creation
@@ -50,11 +84,116 @@ const registerUser = asyncHandlerPromiseVersion(async (req, res) => {
     "-password -refreshToken"
   );
   if (user) {
-    return res.status(201).json( new ApiResponse(200, user));
+    return res.status(201).json(new ApiResponse(200, user));
   } else {
     throw new ApiError(500, "Something went wrong");
   }
   //Step8: return responsee to user, except password and refresh token
 });
 
-export { registerUser };
+const loginUser = asyncHandlerPromiseVersion(async (req, res) => {
+  //Step: 1 get user details from database
+  const { username, email, password } = req.body;
+
+  if ((!username || !email) && !password) {
+    throw new ApiError(400, "username or email is required");
+  }
+  //Step2: validation
+  if ([username, email, password].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const getUser = await User.findOne({ $or: [{ username }, { email }] });
+
+  //Step: 2 check user if exist or not
+  if (!getUser) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  //Step: 3 check password is correct or not
+
+  const isPasswordMatch = await getUser.isPasswordCorrect(password);
+
+  if (!isPasswordMatch) {
+    throw new ApiError(402, "Password does not match");
+  }
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    getUser._id
+  );
+
+  const loggedInUser = await User.findById(getUser._id).select(
+    "-password -refreshToken"
+  );
+
+  const options = { httpOnly: true, secure: true };
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(200, {
+        user: loggedInUser,
+        accessToken,
+        refreshToken,
+      })
+    );
+});
+
+const logoutUser = asyncHandlerPromiseVersion(async (req, res) => {
+  await User.findOneAndUpdate(
+    req.user._id,
+    {
+      $set: { refreshToken: undefined },
+    },
+    { new: true }
+  );
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged Out"));
+});
+
+const refrestAccessToken = asyncHandlerPromiseVersion(async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Uauthorized request. Please login again");
+  }
+  const verifyToken = jwt.verify(
+    incomingRefreshToken,
+    process.env.REFRESH_TOKEN_SECRET
+  );
+  if (!verifyToken) {
+    throw new ApiError(401, "Please login again");
+  }
+  const userId = verifyToken._id;
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, "User not found. Please create your account");
+  }
+  if (incomingRefreshToken !== user.refreshToken) {
+    throw new ApiError(401, "Refresh Token is Invalid or expired");
+  }
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(200, {
+        user: user,
+        accessToken,
+        refreshToken:"Access token refereshed"
+      })
+    );
+});
+export { registerUser, loginUser, logoutUser, refrestAccessToken };
