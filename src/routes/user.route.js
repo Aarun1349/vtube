@@ -3,10 +3,14 @@ import {
   registerUser,
   loginUser,
   logoutUser,
-  refrestAccessToken,
+  refreshAccessToken,
+  getCurrentUser,
+  changeCurrentPassword,
+  updateUserDetails,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import multer from "multer";
 const userRouter = Router();
 
 userRouter.route("/register").post(
@@ -23,5 +27,8 @@ userRouter.route("/register").post(
 userRouter.route("/login").get(loginUser);
 //secured routes
 userRouter.route("/logout").post(verifyJWT, logoutUser);
-userRouter.route("/refresh-token").post(refrestAccessToken)
+userRouter.route("/refresh-token").post(refreshAccessToken);
+userRouter.route("/user").get(verifyJWT, getCurrentUser);
+userRouter.route("/password").put(verifyJWT, changeCurrentPassword);
+userRouter.route("/update").put(verifyJWT, updateUserDetails);
 export default userRouter;

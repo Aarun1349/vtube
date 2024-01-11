@@ -5,11 +5,11 @@ import { User } from "../models/user.model.js";
 export const verifyJWT = asyncHandlerPromiseVersion(async (req, _, next) => {
   // can be found this code in production scenario
 
-  try {
-    const token =
-      req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer ", "");
-    if (!token) {
+try {
+  const token =
+  req.cookies?.accessToken ||
+  req.header("Authorization")?.replace("Bearer ", "");
+    if (!token || token === undefined) {
       throw new ApiError(401, "Unauthorized User");
     }
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
