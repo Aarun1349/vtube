@@ -1,4 +1,7 @@
 node_modules
 .env
+<<<<<<< HEAD
 .env
 public/photos
+=======
+>>>>>>> 2dc0bce25a0386ec3cb2c5c1ab8293dfc76ee40b
