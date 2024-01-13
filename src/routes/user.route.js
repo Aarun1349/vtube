@@ -7,6 +7,7 @@ import {
   getCurrentUser,
   changeCurrentPassword,
   updateUserDetails,
+  getUserChannelProfile,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -31,4 +32,5 @@ userRouter.route("/refresh-token").post(refreshAccessToken);
 userRouter.route("/user").get(verifyJWT, getCurrentUser);
 userRouter.route("/password").put(verifyJWT, changeCurrentPassword);
 userRouter.route("/update").put(verifyJWT, updateUserDetails);
+userRouter.route("/channel/:id").get(verifyJWT, getUserChannelProfile);
 export default userRouter;
