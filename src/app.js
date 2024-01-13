@@ -17,8 +17,13 @@ app.use(express.static("public"))
 
 //routes imports
 import userRouter from "./routes/user.route.js";
+import commentRouter from "./routes/comment.routes.js";
 
 //routes declaration
 app.use('/api/v1/users',userRouter)
+// app.use('/api/v1/video',userRouter)
+app.use('/api/v1/comment',commentRouter)
+// app.use('/api/v1/subscription',userRouter)
+// app.use('/api/v1/users',userRouter)
 
 export { app };

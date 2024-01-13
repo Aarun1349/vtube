@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 const commentSchema = Schema(
   {
     owner: {
@@ -12,6 +12,6 @@ const commentSchema = Schema(
   },
   { timestamp: true }
 );
-
+commentSchema.plugin(mongooseAggregatePaginate);
 const Comment = model("Comment", commentSchema);
 export { Comment };
