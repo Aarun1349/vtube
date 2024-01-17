@@ -1,14 +1,25 @@
-import { asyncHandlerPromiseVersion } from "../utils/asyncHandler.js";
+import mongoose from "mongoose";
+import { Comment } from "../models/comments.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { Comment } from "../models/comments.model.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-const getVideoComments = asyncHandlerPromiseVersion(async (req, res) => {});
+const getVideoComments = asyncHandler(async (req, res) => {
+  //TODO: get all comments for a video
+  const { videoId } = req.params;
+  const { page = 1, limit = 10 } = req.query;
+});
 
-const addComment = asyncHandlerPromiseVersion(async (req, res) => {});
+const addComment = asyncHandler(async (req, res) => {
+  // TODO: add a comment to a video
+});
 
-const updateComment = asyncHandlerPromiseVersion(async (req, res) => {});
+const updateComment = asyncHandler(async (req, res) => {
+  // TODO: update a comment
+});
 
-const deleteComment = asyncHandlerPromiseVersion(async (req, res) => {});
+const deleteComment = asyncHandler(async (req, res) => {
+  // TODO: delete a comment
+});
 
-export { getVideoComments, updateComment, deleteComment, addComment };
+export { getVideoComments, addComment, updateComment, deleteComment };

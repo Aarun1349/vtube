@@ -1,37 +1,47 @@
-import { asyncHandlerPromiseVersion } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { Video } from "../models/video.model.js";
-import { uploadOnCloudinary } from "../utils/Cloudinary.js";
+import mongoose, {isValidObjectId} from "mongoose"
+import {Video} from "../models/video.model.js"
+import {User} from "../models/user.model.js"
+import {ApiError} from "../utils/ApiError.js"
+import {ApiResponse} from "../utils/ApiResponse.js"
+import {asyncHandler} from "../utils/asyncHandler.js"
+import {uploadOnCloudinary} from "../utils/Cloudinary.js"
 
-const getAllVideos = asyncHandlerPromiseVersion(async (req, res) => {
-  const { page = 1, limit = 10, sortBy, query, sortType, userId } = req.query;
-});
 
-const publishAVideo = asyncHandlerPromiseVersion(async (req, res) => {
-  const { title, description } = req.body;
-});
+const getAllVideos = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    //TODO: get all videos based on query, sort, pagination
+})
 
-const getVideoById = asyncHandlerPromiseVersion(async (req, res) => {
-  const { videoId } = req.params;
-});
+const publishAVideo = asyncHandler(async (req, res) => {
+    const { title, description} = req.body
+    // TODO: get video, upload to cloudinary, create video
+})
 
-const updateVideo = asyncHandlerPromiseVersion(async (req, res) => {
-  const { videoId } = req.params;
-});
-const deleteVideo = asyncHandlerPromiseVersion(async (req, res) => {
-  const { videoId } = req.params;
-});
+const getVideoById = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+    //TODO: get video by id
+})
 
-const togglePublishStatus = asyncHandlerPromiseVersion(async (req, res) => {
-  const { videoId } = req.params;
-});
+const updateVideo = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+    //TODO: update video details like title, description, thumbnail
+
+})
+
+const deleteVideo = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+    //TODO: delete video
+})
+
+const togglePublishStatus = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+})
 
 export {
-  getAllVideos,
-  getVideoById,
-  updateVideo,
-  publishAVideo,
-  deleteVideo,
-  togglePublishStatus,
-};
+    getAllVideos,
+    publishAVideo,
+    getVideoById,
+    updateVideo,
+    deleteVideo,
+    togglePublishStatus
+}

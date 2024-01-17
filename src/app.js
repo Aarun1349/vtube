@@ -17,7 +17,7 @@ app.use(express.static("public"))
 
 //routes imports
 import userRouter from "./routes/user.route.js";
-import commentRouter from "./routes/comment.routes.js";
+import commentRouter from "./routes/comment.route.js";
 
 //routes declaration
 app.use('/api/v1/users',userRouter)

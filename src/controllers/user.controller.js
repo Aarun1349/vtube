@@ -145,7 +145,7 @@ const logoutUser = asyncHandlerPromiseVersion(async (req, res) => {
   await User.findOneAndUpdate(
     req.user._id,
     {
-      $unset: { refreshToken: 1  },// this removes the field from document
+      $unset: { refreshToken: 1 }, // this removes the field from document
     },
     { new: true }
   );
@@ -394,21 +394,26 @@ const getUserWatchHistory = asyncHandlerPromiseVersion(async (req, res) => {
                     avatar: 1,
                   },
                 },
-                {$addFields:{
-                  owner:{
-                    $first:"$owner"
-                  }
-                }}
+                {
+                  $addFields: {
+                    owner: {
+                      $first: "$owner",
+                    },
+                  },
+                },
               ],
             },
           },
         ],
       },
     },
-    
   ]);
 
-  return res.status(200).json(new ApiResponse(200,user[0].watchHistory,"Watch History is fetched"))
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, user[0].watchHistory, "Watch History is fetched")
+    );
 });
 
 export {
@@ -422,5 +427,5 @@ export {
   updateUserAvatar,
   updateUserCoverImage,
   getUserChannelProfile,
-  getUserWatchHistory
+  getUserWatchHistory,
 };
