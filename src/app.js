@@ -33,6 +33,6 @@ app.use("/api/v1/tweets", tweetRouter);
 app.use("/api/v1/like", likesRouter);
 app.use("/api/v1/playlist", playListRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
-app.use("/api/v1/heathcheck", healthcheckRouter);
+app.use("/api/v1/healthcheck", healthcheckRouter);
 
 export { app };
