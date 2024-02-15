@@ -23,11 +23,24 @@ const toggleVideoLike = asyncHandlerPromiseVersion(async (req, res) => {
     throw new ApiError(404, "Requested video not found");
   }
 
-  const toggleLike = await Like.create({
+  const isLiked = await Like.findOne({
     video: videoId,
-    likedBy: userId,
-    isLiked: !isLiked,
   });
+  let toggleLike = null;
+  if (!isLiked) {
+    toggleLike = await Like.create({
+      video: videoId,
+      likedBy: userId,
+      isLiked: true,
+    });
+  } else {
+    toggleLike = await Like.findOneAndUpdate({
+      video: videoId,
+      likedBy: userId,
+      isLiked: !isLiked,
+    });
+  };
+
 
   if (!toggleLike) {
     throw new ApiError(400, "Can't like this");
@@ -36,9 +49,10 @@ const toggleVideoLike = asyncHandlerPromiseVersion(async (req, res) => {
   res.status(200).json(new ApiResponse(200, toggleLike, "success"));
 });
 
-const toggleCommentLike = asyncHandler(async (req, res) => {
+const toggleCommentLike = asyncHandlerPromiseVersion(async (req, res) => {
   //TODO: toggle like on comment
 
+  console.log("___Liked___", req.user, req.params);
   const { commentId } = req.params;
 
   const userId = req.user.id;
@@ -49,12 +63,24 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
   if (!getCommentsById) {
     throw new ApiError(404, "Requested comment not found");
   }
-
-  const toggleLike = await Like.create({
+  const isLiked = await Like.findOne({
     comment: commentId,
-    likedBy: userId,
-    isLiked: !isLiked,
   });
+  let toggleLike = null;
+  
+  if (!isLiked) {
+    toggleLike = await Like.create({
+      comment: commentId,
+      likedBy: userId,
+      isLiked: true,
+    });
+  } else {
+    toggleLike = await Like.findOneAndUpdate({
+      comment: commentId,
+      likedBy: userId,
+      isLiked: !isLiked.isLiked,
+    });
+  }
 
   if (!toggleLike) {
     throw new ApiError(400, "Can't like this");
@@ -76,11 +102,23 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Requested tweet not found");
   }
 
-  const toggleLike = await Like.create({
+  const isLiked = await Like.findOne({
     tweet: tweetId,
-    likedBy: userId,
-    isLiked: !isLiked,
   });
+  let toggleLike = null;
+  if (!isLiked) {
+    toggleLike = await Like.create({
+      tweet: tweetId,
+      likedBy: userId,
+      isLiked: true,
+    });
+  } else {
+    toggleLike = await Like.findOneAndUpdate({
+      tweet: tweetId,
+      likedBy: userId,
+      isLiked: !isLiked,
+    });
+  };
 
   if (!toggleLike) {
     throw new ApiError(400, "Can't like this");

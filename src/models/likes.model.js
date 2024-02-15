@@ -28,7 +28,7 @@ const likesSchema = Schema(
     },
     isLiked: {
       type: Boolean,
-      default:false,
+      default: false,
       require: true,
     },
   },
