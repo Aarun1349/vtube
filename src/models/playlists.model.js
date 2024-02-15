@@ -14,7 +14,7 @@ const playlistSchema = Schema(
       ref: "Video",
       required: true,
     },
-    content: { required: true, type: String },
+    
   },
   { timestamp: true }
 );

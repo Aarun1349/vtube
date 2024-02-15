@@ -2,9 +2,9 @@ import mongoose, { isValidObjectId } from "mongoose";
 import { Playlist } from "../models/playlists.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { asyncHandler, asyncHandlerPromiseVersion } from "../utils/asyncHandler.js";
 
-const createPlaylist = asyncHandler(async (req, res) => {
+const createPlaylist = asyncHandlerPromiseVersion(async (req, res) => {
   const { name, description } = req.body;
 
   //TODO: create playlist
@@ -40,7 +40,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, getPlaylists, "success"));
 });
 
-const getPlaylistById = asyncHandler(async (req, res) => {
+const getPlaylistById = asyncHandlerPromiseVersion(async (req, res) => {
   const { playlistId } = req.params;
   //TODO: get playlist by id
   const userId = req.user.id;
