@@ -5,12 +5,12 @@ const likesSchema = Schema(
     video: {
       type: Schema.Types.ObjectId,
       ref: "Video",
-      required: true,
+      // required: true,
     },
     comment: {
       type: Schema.Types.ObjectId,
       ref: "Comment",
-      required: true,
+      // required: true,
     },
     likedBy: {
       type: Schema.Types.ObjectId,
@@ -20,9 +20,17 @@ const likesSchema = Schema(
     tweets: {
       type: Schema.Types.ObjectId,
       ref: "Tweet",
-      required: true,
+      // required: true,
     },
-    content: { required: true, type: String },
+    content: {
+      type: String,
+      //  required: true
+    },
+    isLiked: {
+      type: Boolean,
+      default: false,
+      require: true,
+    },
   },
 
   { timestamp: true }

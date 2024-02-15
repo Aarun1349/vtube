@@ -1,10 +1,12 @@
-import { asyncHandlerPromiseVersion } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandlerPromiseVersion } from "../utils/asyncHandler.js";
 
+const healthcheck = asyncHandlerPromiseVersion(async (req, res) => {
+  //TODO: build a healthcheck response that simply returns the OK status as json with a message
 
-const heathCheck = asyncHandlerPromiseVersion(async(req,res)=>{
+  res
+    .status(200)
+    .send(new ApiResponse(200, "Vtube app is running successfully"));
+});
 
-})
-
-export {heathCheck}
+export { healthcheck };

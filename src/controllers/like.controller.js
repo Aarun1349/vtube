@@ -1,20 +1,147 @@
-import { asyncHandlerPromiseVersion } from "../utils/asyncHandler.js";
+import mongoose, { isValidObjectId } from "mongoose";
+import { Like } from "../models/likes.model.js";
+import { Video } from "../models/video.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { Likes } from "../models/likes.model.js";
+import {
+  asyncHandler,
+  asyncHandlerPromiseVersion,
+} from "../utils/asyncHandler.js";
+import { Comment } from "../models/comments.model.js";
+import { Tweet } from "../models/tweets.model.js";
 
 const toggleVideoLike = asyncHandlerPromiseVersion(async (req, res) => {
-    const {videoId} = req.params;
+  //TODO: toggle like on video
+
+  const { videoId } = req.params;
+  const userId = req.user.id;
+  if (!userId) {
+    throw new ApiError(400, "please login first");
+  }
+  const getVideoById = await Video.findById(videoId);
+  if (!getVideoById) {
+    throw new ApiError(404, "Requested video not found");
+  }
+
+  const isLiked = await Like.findOne({
+    video: videoId,
+  });
+  let toggleLike = null;
+  if (!isLiked) {
+    toggleLike = await Like.create({
+      video: videoId,
+      likedBy: userId,
+      isLiked: true,
+    });
+  } else {
+    toggleLike = await Like.findOneAndUpdate({
+      video: videoId,
+      likedBy: userId,
+      isLiked: !isLiked,
+    });
+  };
+
+
+  if (!toggleLike) {
+    throw new ApiError(400, "Can't like this");
+  }
+
+  res.status(200).json(new ApiResponse(200, toggleLike, "success"));
 });
 
 const toggleCommentLike = asyncHandlerPromiseVersion(async (req, res) => {
-    const {commentId} = req.params;
+  //TODO: toggle like on comment
+
+  console.log("___Liked___", req.user, req.params);
+  const { commentId } = req.params;
+
+  const userId = req.user.id;
+  if (!userId) {
+    throw new ApiError(400, "please login first");
+  }
+  const getCommentsById = await Comment.findById(commentId);
+  if (!getCommentsById) {
+    throw new ApiError(404, "Requested comment not found");
+  }
+  const isLiked = await Like.findOne({
+    comment: commentId,
+  });
+  let toggleLike = null;
+  
+  if (!isLiked) {
+    toggleLike = await Like.create({
+      comment: commentId,
+      likedBy: userId,
+      isLiked: true,
+    });
+  } else {
+    toggleLike = await Like.findOneAndUpdate({
+      comment: commentId,
+      likedBy: userId,
+      isLiked: !isLiked.isLiked,
+    });
+  }
+
+  if (!toggleLike) {
+    throw new ApiError(400, "Can't like this");
+  }
+
+  res.status(200).json(new ApiResponse(200, toggleLike, "success"));
 });
 
-const toggleTweetLike = asyncHandlerPromiseVersion(async (req, res) => {
-    const {tweetId} = req.params;
+const toggleTweetLike = asyncHandler(async (req, res) => {
+  //TODO: toggle like on tweet
+  const { tweetId } = req.params;
+
+  const userId = req.user.id;
+  if (!userId) {
+    throw new ApiError(400, "please login first");
+  }
+  const getTweetById = await Tweet.findById(tweetId);
+  if (!getTweetById) {
+    throw new ApiError(404, "Requested tweet not found");
+  }
+
+  const isLiked = await Like.findOne({
+    tweet: tweetId,
+  });
+  let toggleLike = null;
+  if (!isLiked) {
+    toggleLike = await Like.create({
+      tweet: tweetId,
+      likedBy: userId,
+      isLiked: true,
+    });
+  } else {
+    toggleLike = await Like.findOneAndUpdate({
+      tweet: tweetId,
+      likedBy: userId,
+      isLiked: !isLiked,
+    });
+  };
+
+  if (!toggleLike) {
+    throw new ApiError(400, "Can't like this");
+  }
+
+  res.status(200).json(new ApiResponse(200, toggleLike, "success"));
 });
 
-const getLikedVideos = asyncHandlerPromiseVersion(async (req, res) => {});
+const getLikedVideos = asyncHandler(async (req, res) => {
+  //TODO: get all liked videos
 
-export { getLikedVideos, toggleCommentLike, toggleVideoLike, toggleTweetLike };
+  const userId = req.user.id;
+  if (!userId) {
+    throw new ApiError(400, "please login first");
+  }
+  const getLikedVideoByUser = await await Like.find({
+    likedBy: userId,
+  });
+  if (!getLikedVideoByUser) {
+    throw new ApiError(404, "Requested comment not found");
+  }
+
+  res.status(200).json(new ApiResponse(200, getLikedVideoByUser, "success"));
+});
+
+export { toggleCommentLike, toggleTweetLike, toggleVideoLike, getLikedVideos };
